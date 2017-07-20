@@ -1,4 +1,0 @@
-heartbeat.monitors:
-- type: http
-  urls: ["http://localhost:8080"]
-  schedule: '@every 10s'
