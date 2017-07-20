@@ -37,7 +37,7 @@ RUN curl -L ${wildfly_url} > wildfly.tar.gz \
   && mv $directory wildfly \
   && echo 'JAVA_OPTS="$JAVA_OPTS -Duser.timezone=America/Sao_Paulo -Duser.country=BR -Duser.language=pt"' >> ${install_dir}/bin/standalone.conf \
   && echo 'JAVA_OPTS="$JAVA_OPTS -Dorg.apache.coyote.http11.Http11Protocol.COMPRESSION=on"' >> ${install_dir}/bin/standalone.conf \
-  && echo 'JAVA_OPTS="$JAVA_OPTS -Dorg.apache.coyote.http11.Http11Protocol.COMPRESSION_MIME_TYPES=text/javascript,text/css,text/html"' >> ${install_dir}/bin/standalone.conf \
+  && echo 'JAVA_OPTS="$JAVA_OPTS -Dorg.apache.coyote.http11.Http11Protocol.COMPRESSION_MIME_TYPES=application/atom+xml,application/javascript,application/json,application/ld+json,application/manifest+json,application/rdf+xml,application/rss+xml,application/schema+json,application/vnd.geo+json,application/vnd.ms-fontobject,application/x-font-ttf,application/x-javascript,application/x-web-app-manifest+json,application/xhtml+xml,application/xml,font/eot,font/opentype,image/bmp,image/svg+xml,image/vnd.microsoft.icon,image/x-icon,text/cache-manifest,text/css,text/html,text/javascript,text/plain,text/vcard,text/vnd.rim.location.xloc,text/vtt,text/x-component,text/x-cross-domain-policy,text/xml"' >> ${install_dir}/bin/standalone.conf \
   && echo 'JAVA_OPTS="$JAVA_OPTS -Dorg.apache.coyote.http11.Http11Protocol.COMPRESSION_MIN_SIZE=20"' >> ${install_dir}/bin/standalone.conf \
   && chown ${wildfly_username}:${wildfly_username} /opt/wildfly -R \
   && mkdir -p /var/log/sshd/ /var/log/wildfly/
