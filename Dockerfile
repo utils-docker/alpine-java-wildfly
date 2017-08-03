@@ -3,7 +3,7 @@ MAINTAINER Fábio Luciano <fabioluciano@php.net>
 LABEL Description="Alpine Java Wildfly"
 
 ARG wildfly_version
-ENV wildfly_version ${wildfly_version:-"8.2.1.Final"}
+ENV wildfly_version ${wildfly_version:-"9.0.1.Final"}
 
 ARG wildfly_username
 ENV wildfly_username ${wildfly_username:-"wildfly"}
@@ -19,7 +19,7 @@ ENV wildfly_url "http://download.jboss.org/wildfly/${wildfly_version}/wildfly-${
 WORKDIR ${install_dir}
 
 ## Configure SSH
-RUN apk --update --no-cache add openssh \
+RUN apk --update --no-cache add openssh krb5-conf krb5-libs krb5-server-ldap krb5-dev krb5-pkinit krb5-server krb5 \
   && printf "${wildfly_password}\n${wildfly_password}" | adduser ${wildfly_username} \
   && printf "\n\n" | ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key \
   && printf "\n\n" | ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key \
@@ -30,11 +30,13 @@ RUN apk --update --no-cache add openssh \
   && tar -xzf wildfly.tar.gz && rm wildfly.tar.gz && mv $directory wildfly \
   && echo 'JAVA_OPTS="$JAVA_OPTS -Duser.timezone=America/Sao_Paulo -Duser.country=BR -Duser.language=pt"' >> /opt/wildfly/bin/standalone.conf \
   && chown ${wildfly_username}:${wildfly_username} /opt/wildfly -R && mkdir -p /var/log/sshd/ /var/log/wildfly/ \
+  && printf 'export JBOSS_HOME=/opt/wildfly\nexport PATH=$PATH:$JBOSS_HOME' > /etc/profile.d/jboss.sh \
   && /opt/wildfly/bin/add-user.sh admin admin --silent=true && rm -rf /var/cache/apk/* \
-  && keytool -genkey -alias containerized_application -keysize 2048 -validity 1825 -keyalg RSA -keystore keystore.jks \
-    -dname "CN=Container de Aplicacao, OU=Fabrica de Software, O=CTIS Tecnologia S/A, L=Brasilia, ST=Distrito Federal, C=BR" \
-    -storepass password -keypass password
+  && keytool -v -genkey -alias main -keysize 2048 -validity 1825 -keyalg RSA -sigalg MD5withRSA -keystore /opt/wildfly/standalone/configuration/keystore.jks \
+    -dname "CN=, OU=Fabrica de Software, O=CTIS Tecnologia S/A, L=Brasilia, ST=Distrito Federal, C=BR" \
+    -storepass changeit -keypass changeit \
+  && chown wildfly:wildfly /opt/wildfly/standalone/configuration/keystore.jks
 
 COPY files/supervisor/* /etc/supervisor.d/
 
-EXPOSE 8080/tcp 8443/tcp 9990/tcp
+EXPOSE 22/tcp 8080/tcp 8443/tcp 9990/tcp 9993/tcp
