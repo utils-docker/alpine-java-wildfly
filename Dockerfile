@@ -19,7 +19,7 @@ ENV wildfly_url "http://download.jboss.org/wildfly/${wildfly_version}/wildfly-${
 WORKDIR ${install_dir}
 
 ## Configure SSH
-RUN apk --update --no-cache add openssh krb5-conf krb5-libs krb5-server-ldap krb5-dev krb5-pkinit krb5-server krb5 \
+RUN apk --update --no-cache add openssh \
   && printf "${wildfly_password}\n${wildfly_password}" | adduser ${wildfly_username} \
   && printf "\n\n" | ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key \
   && printf "\n\n" | ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key \
@@ -31,12 +31,12 @@ RUN apk --update --no-cache add openssh krb5-conf krb5-libs krb5-server-ldap krb
   && echo 'JAVA_OPTS="$JAVA_OPTS -Duser.timezone=America/Sao_Paulo -Duser.country=BR -Duser.language=pt"' >> /opt/wildfly/bin/standalone.conf \
   && chown ${wildfly_username}:${wildfly_username} /opt/wildfly -R && mkdir -p /var/log/sshd/ /var/log/wildfly/ \
   && printf 'export JBOSS_HOME=/opt/wildfly\nexport PATH=$PATH:$JBOSS_HOME' > /etc/profile.d/jboss.sh \
-  && /opt/wildfly/bin/add-user.sh admin admin --silent=true && rm -rf /var/cache/apk/* \
-  && keytool -v -genkey -alias main -keysize 2048 -validity 1825 -keyalg RSA -sigalg MD5withRSA -keystore /opt/wildfly/standalone/configuration/keystore.jks \
-    -dname "CN=, OU=Fabrica de Software, O=CTIS Tecnologia S/A, L=Brasilia, ST=Distrito Federal, C=BR" \
-    -storepass changeit -keypass changeit \
-  && chown wildfly:wildfly /opt/wildfly/standalone/configuration/keystore.jks
+  && /opt/wildfly/bin/add-user.sh admin admin --silent=true \
+  && rm -rf /var/cache/apk/*
 
 COPY files/supervisor/* /etc/supervisor.d/
+
+
+VOLUME ["/opt/wildfly/standalone/deployments/", "/opt/wildfly/standalone/tmp/", "/opt/wildfly/standalone/data/", "/opt/wildfly/standalone/logs/"] 
 
 EXPOSE 22/tcp 8080/tcp 8443/tcp 9990/tcp 9993/tcp
